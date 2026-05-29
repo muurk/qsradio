@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # needed for git describe --tags in version embedding
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod  # pins CI to same Go version as go.mod; keeps gofmt identical
+          cache: true
+
+      - name: Build Go binaries
+        run: make dist
+
+      - name: Collect release artifacts
+        # Rename binaries to include platform in the filename.
+        # Without this all Linux and macOS binaries are named 'qsradio'
+        # and the release upload would reject duplicates.
+        run: |
+          mkdir -p release
+          cp dist/linux-amd64/qsradio       release/qsradio-linux-amd64
+          cp dist/linux-arm64/qsradio       release/qsradio-linux-arm64
+          cp dist/linux-armv7/qsradio       release/qsradio-linux-armv7
+          cp dist/darwin-amd64/qsradio      release/qsradio-darwin-amd64
+          cp dist/darwin-arm64/qsradio      release/qsradio-darwin-arm64
+          cp dist/windows-amd64/qsradio.exe release/qsradio-windows-amd64.exe
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: release/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

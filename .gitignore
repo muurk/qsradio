@@ -1,0 +1,4 @@
+# Build output (root-level binaries and cross-compiled releases)
+/qsradio
+/qsradio.exe
+/dist/
