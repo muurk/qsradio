@@ -2,3 +2,6 @@
 /qsradio
 /qsradio.exe
 /dist/
+
+# macOS metadata
+.DS_Store
